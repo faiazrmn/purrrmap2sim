@@ -1,0 +1,79 @@
+---
+title: "Simulation Using Purrr map2 for two sample ttest"
+author: "FRK"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+bibliography: bib.bib
+nocite: '@*'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.width = 9)
+```
+
+
+```{r}
+### Avoid for loops with purrr
+### Simulate With Purrr map & map2
+
+require(tidyverse)
+
+### Mean and SD from two groups ==> HRT and Placebo
+### Within each group we have two measurements, HDL and LDL
+d <- tibble(group = c("HRT", "Placebo"),
+       MeanHDL  = c(8.1, 2.4),
+       sdHDL = c(10.5, 4.3),
+       MeanLDL  = c(-18.2, -2.2),
+       sdLDL = c(26.5, 12.2))
+
+d
+
+### For vertical lines in ggplot
+vline.data <- data.frame(z = c(8.1, 2.4, -18.2, -2.2), 
+                         Type = c("SimHDL", "SimHDL", "SimLDL", "SimLDL"))
+vline.data
+
+### Simulate
+dsim <- d %>% 
+  mutate(SimHDL = map2(MeanHDL, sdHDL, ~ rnorm(10000, ..1, ..2)),
+         SimLDL = map2(MeanLDL, sdLDL, ~ rnorm(10000, ..1, ..2))
+  ) 
+### purrr just enabled me to avoid writing TWO for loops
+dsim
+
+head(dsim %>% 
+       unnest(cols = SimHDL:SimLDL)
+     )
+
+### Make Plot
+plotly::ggplotly( 
+  dsim %>% 
+  pivot_longer(cols = SimHDL:SimLDL,names_to = "Type", values_to = "Value") %>% 
+  unnest() %>% 
+  ggplot(aes(Value, fill = group, color = group)) + 
+  geom_density(alpha = 0.3) +
+  geom_vline(data = vline.data, aes(xintercept = z), alpha = 0.5, linetype = "longdash")+
+  facet_wrap(~Type, scales = "free") +
+  theme_light()
+)
+
+
+
+```
+
+***
+
+```{r, echo=FALSE,, out.width = '100%'}
+knitr::include_graphics("capture.jpg")
+```
+
+
+
+# References
+
+
+<div id="refs"></div>
+
+
+
+***
