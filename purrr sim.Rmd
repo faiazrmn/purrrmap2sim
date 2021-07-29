@@ -2,7 +2,9 @@
 title: "Simulation Using Purrr map2 for two sample ttest"
 author: "FRK"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: html_document
+output: 
+  html_document:
+    highlight: tango
 bibliography: bib.bib
 nocite: '@*'
 ---
@@ -11,6 +13,22 @@ nocite: '@*'
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.width = 9)
 ```
 
+# Avoid for loop
+
+for loops can be repetitive and require quiet a few lines of codes everytime. Also need to define some empty vector to store values from *for loop* and merge them with data later.  
+
+With *purrr* package, all of these can be avoided. And a function can be applied to each piece of a data frame very easily.
+
+
+# Data
+
+Data is collected from Niel Weiss's book. Reference given in bibliography section.  
+
+We have two groups of women. One group is given hormone replacement therapy (HRT), and another group is placebo.  
+
+We aim to see whether this HRT makes any diffrence in women's Low serum levels of high-density-lipoprotein (HDL) cholesterol andhigh serum levels of low-density-lipoprotein (LDL) cholesterol. Abnormal levels of these two measures can result in coronary heart disease (CHD) in women.  
+
+We have mean and sd fro these two groups. But the sample size is small. We will simulate 1000 samples from both groups, and for both variables. This is lke taking 1000 random samples from the population from each group.
 
 ```{r}
 ### Avoid for loops with purrr
@@ -35,8 +53,8 @@ vline.data
 
 ### Simulate
 dsim <- d %>% 
-  mutate(SimHDL = map2(MeanHDL, sdHDL, ~ rnorm(10000, ..1, ..2)),
-         SimLDL = map2(MeanLDL, sdLDL, ~ rnorm(10000, ..1, ..2))
+  mutate(SimHDL = map2(MeanHDL, sdHDL, ~ rnorm(1000, ..1, ..2)),
+         SimLDL = map2(MeanLDL, sdLDL, ~ rnorm(1000, ..1, ..2))
   ) 
 ### purrr just enabled me to avoid writing TWO for loops
 dsim
@@ -61,7 +79,13 @@ plotly::ggplotly(
 
 ```
 
+# Comment on Plot
+
+From the plot, we may suggest there is difference in variation between HRT and placebo groups. But the difference in mean level of HDL and LDL among two groups may not be difference due to overlap.
+
 ***
+
+# Source
 
 ```{r, echo=FALSE,, out.width = '100%'}
 knitr::include_graphics("capture.jpg")
