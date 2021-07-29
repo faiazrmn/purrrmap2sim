@@ -50,20 +50,35 @@ d
 vline.data <- data.frame(z = c(8.1, 2.4, -18.2, -2.2), 
                          Type = c("SimHDL", "SimHDL", "SimLDL", "SimLDL"))
 vline.data
+```
 
-### Simulate
+# **purrr** and Simulate
+
+We have 2 parameters in *rnorm* function, so we will use *map2* function from *purrr*, which takse in two parameters for a function.  
+
+
+```{r}
 dsim <- d %>% 
   mutate(SimHDL = map2(MeanHDL, sdHDL, ~ rnorm(1000, ..1, ..2)),
          SimLDL = map2(MeanLDL, sdLDL, ~ rnorm(1000, ..1, ..2))
   ) 
 ### purrr just enabled me to avoid writing TWO for loops
 dsim
+```
 
+# unnest
+
+We can *unnest* the SimHDL and SimLDL columns to expand their values.
+
+```{r}
 head(dsim %>% 
        unnest(cols = SimHDL:SimLDL)
      )
+```
 
-### Make Plot
+# Make Plot
+
+```{r}
 plotly::ggplotly( 
   dsim %>% 
   pivot_longer(cols = SimHDL:SimLDL,names_to = "Type", values_to = "Value") %>% 
